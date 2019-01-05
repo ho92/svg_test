@@ -1,0 +1,109 @@
+<style>
+        #svg{
+            background-color: beige
+        }
+        .static {
+            cursor: not-allowed
+        }
+        .userObject {
+            cursor: pointer
+        }
+        </style>
+        <svg id="svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 20" onload="addEvent(evt)">
+                <defs>
+                    <marker id="Triangle" viewBox="0 0 10 10" refX="1" refY="5" makerWidth="6" makerHeight="6" orient="auto" fill="#cccccc">
+                        <path d="M 0 0 L 10 5 L 0 10 z" />
+                    </marker>
+                </defs>
+        </svg>
+    
+    
+    
+    <script>
+        var svgNS = "http://www.w3.org/2000/svg";
+        var selectedObj;
+        function addEvent(evt){
+            var svg = evt.target;
+            svg.addEventListener('click', clickEvt);
+        }
+
+        function clickEvt(evt){
+            var selectedElement = evt.target;
+            var objType = selectedElement.nodeName;
+            if(objType){
+                switch (objType) {
+                    case "svg" :
+                        console.log("draw rect !");
+                        drawBox(evt);
+                        break;
+                    case "rect" :
+                        console.log("set Focus !");
+                        setSelected(evt);
+                        break;                    
+                    default :
+                        break;
+                }
+    
+                
+            }
+            return;
+        }
+    
+    function drawBox(evt){
+        var offset = getMousePosistion(evt);
+        var pos_x = offset.x;
+        var pos_y = offset.y;
+        var width = "1.5";    
+        var height = "1.5";
+        document.getElementById("svg").appendChild(makeBox(pos_x, pos_y, width, height));
+    }
+    
+    var rectNum = 0;
+    function makeBox(start_x, start_y, width, height){
+        var newRect = document.createElementNS(svgNS, "rect");
+        var num = rectNum++;
+    
+        //클릭한 가운데 포지션에 생성
+        var w = (width / 2).toFixed(2);
+        var h = (height / 2).toFixed(2);
+        var x = start_x - w;
+        var y = start_y - h;
+        //var x = start_x;
+        //var y = start_y;
+    
+        newRect.setAttributeNS(null, "id", "rect_" + num);
+        newRect.setAttributeNS(null, "x", x);
+        newRect.setAttributeNS(null, "y", y);
+        newRect.setAttributeNS(null, "width", width);
+        newRect.setAttributeNS(null, "height", height);
+        newRect.setAttributeNS(null, "fill", "yellow");
+        newRect.setAttributeNS(null, "stroke", "black");
+        newRect.setAttributeNS(null, "stroke-width", 0.01);
+        
+        newRect.addEventListener('click', clickEvt);
+        setFocus(newRect);
+        return newRect;
+    }
+    
+    function setFocus(obj){
+        obj.addEventListener('click', setSelected);
+    }
+    
+    function setSelected(evt){
+        var selectedElement = evt.target;
+        console.log(evt);
+
+        
+        
+    }
+    
+    function getMousePosistion(evt){
+        var svg = document.getElementById("svg");
+        var CTM = svg.getScreenCTM();
+        
+        return {
+            x: (evt.clientX - CTM.e) / CTM.a,
+            y: (evt.clientY - CTM.f) / CTM.d
+        };
+    }    
+    </script>

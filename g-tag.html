@@ -1,0 +1,100 @@
+<!--
+    http://jsfiddle.net/k8Edq/
+    https://www.sitepoint.com/how-to-translate-from-dom-to-svg-coordinates-and-back-again/
+    https://stackoverflow.com/questions/15943292/how-to-drag-an-svg-group-using-d3-js-drag-behavior
+    http://apike.ca/prog_svg_js_create.html
+    https://stackoverflow.com/questions/50596319/set-x-and-y-value-for-g-element-of-svg
+    http://www.d3noob.org/2014/02/attributes-in-d3js.html    
+-->
+<style>
+        #svg{
+            background-color: beige
+        }
+        .static {
+            cursor: not-allowed
+        }
+        .userObject {
+            cursor: pointer
+        }
+        </style>
+        <svg id="svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 20" onload="addEvent(evt)">
+                <defs>
+                    <marker id="Triangle" viewBox="0 0 10 10" refX="1" refY="5" makerWidth="6" makerHeight="6" orient="auto" fill="#cccccc">
+                        <path d="M 0 0 L 10 5 L 0 10 z" />
+                    </marker>
+                </defs>
+        </svg>
+    
+    
+    
+<script>
+    var svgNS = "http://www.w3.org/2000/svg";
+    var selectedObj;
+    function addEvent(evt){
+        var svg = evt.target;
+        svg.addEventListener('click', clickEvt);
+    }
+
+    function clickEvt(evt){
+        var selectedElement = evt.target;
+        var objType = selectedElement.nodeName;
+        drawGroup(evt);
+        return;
+    }
+
+    function drawGroup(evt){
+        var offset = getMousePosistion(evt);
+        var pos_x = offset.x;
+        var pos_y = offset.y;
+        var width = "1.5";    
+        var height = "1.5";
+        document.getElementById("svg").appendChild(makeGroup(pos_x, pos_y, width, height));
+    }
+
+    var rectNum = 0;
+    function makeGroup(start_x, start_y, width, height){
+        var newGroup = document.createElementNS(svgNS, "g");
+        var num = rectNum++;
+    
+        //클릭한 가운데 포지션에 생성
+        var w = (width / 2).toFixed(15);
+        var h = (height / 2).toFixed(15);
+        var x = start_x - w;
+        var y = start_y - h;
+    
+        newGroup.setAttributeNS(null, "id", "group_" + num);
+        newGroup.setAttributeNS(null, "transform", "translate("+ x +","+ y +")");
+        newGroup.setAttributeNS(null, "stroke", "#0000ff");
+        newGroup.setAttributeNS(null, "stroke-width", "4px");
+        newGroup.setAttributeNS(null, "fill", "#ff0000");
+
+        newGroup.appendChild(makeCircle(0,0));
+
+        return newGroup;
+    }
+        
+    var circleNum = 0;
+    function makeCircle(x, y){
+        var newCircle = document.createElementNS(svgNS, "circle");
+        
+        var num = circleNum++;
+        newCircle.setAttributeNS(null, "id", "circle_" + num);
+        newCircle.setAttributeNS(null, "cx", x);
+        newCircle.setAttributeNS(null, "cy", y);
+        newCircle.setAttributeNS(null, "r", 0.1);
+        newCircle.setAttributeNS(null, "fill", "#cccccc");
+        newCircle.setAttributeNS(null, "stroke", "none");
+        return newCircle;
+    }
+
+
+    function getMousePosistion(evt){
+        var svg = document.getElementById("svg");
+        var CTM = svg.getScreenCTM();
+        
+        return {
+            x: (evt.clientX - CTM.e) / CTM.a,
+            y: (evt.clientY - CTM.f) / CTM.d
+        };
+    }    
+</script>
