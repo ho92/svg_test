@@ -69,15 +69,66 @@ function makeCircle(x, y){
     return newCircle;
 }
 
+function getPosRound(pos){
+    if(pos){
+        return Number(pos.toFixed(15));
+    }
+    return 0;
+}
+
 function getPosBottomLine(start_x, start_y, end_x, end_y){
     var points = '';
     var yLen = Math.abs(start_y - end_y);
     yLen = yLen / 2;
-    var yPoint = end_y - yLen.toFixed(15);
+    
+    var yPoint = end_y - getPosRound(yLen);
+    
     points = start_x + "," + start_y;
     points+= " " + start_x + "," + yPoint;
     points+= " " + end_x + "," + yPoint;
     points+= " " + end_x + "," + end_y;
+    return points;
+}
+
+function getPosTopLine(start_x, start_y, end_x, end_y){
+    var points = '';
+    var yLen = Math.abs(start_y - end_y);
+    yLen = yLen / 2;
+    
+    var yPoint = end_y + getPosRound(yLen);
+
+    points = start_x + "," + start_y;
+    points+= " " + start_x + "," + yPoint;
+    points+= " " + end_x + "," + yPoint;
+    points+= " " + end_x + "," + end_y;   
+    return points;
+}
+
+function getPosLeftLine(start_x, start_y, end_x, end_y){
+    var points = '';
+    var xLen = Math.abs(start_x - end_x);
+    xLen = xLen / 2;
+    
+    var xPoint = end_x + getPosRound(xLen);
+
+    points = start_x + "," + start_y;
+    points+= " " + xPoint + "," + start_y;
+    points+= " " + xPoint + "," + end_y;
+    points+= " " + end_x + "," + end_y;     
+    return points;
+}
+
+function getPosRightLine(start_x, start_y, end_x, end_y){
+    var points = '';
+    var xLen = Math.abs(start_x - end_x);
+    xLen = xLen / 2;
+    
+    var xPoint = end_x - getPosRound(xLen);
+
+    points = start_x + "," + start_y;
+    points+= " " + xPoint + "," + start_y;
+    points+= " " + xPoint + "," + end_y;
+    points+= " " + end_x + "," + end_y;     
     return points;
 }
 
@@ -86,8 +137,12 @@ function makeArrow(start_x, start_y, end_x, end_y){
     var newPolyline = document.createElementNS(svgNS, "polyline");
     
     var num = polylineNum++;
-    var points = start_x + "," + start_y + "," + end_x + "," + end_y;
-
+    //var points = start_x + "," + start_y + "," + end_x + "," + end_y;
+    //var points = getPosBottomLine(start_x, start_y, end_x, end_y);
+    //var points = getPosTopLine(start_x, start_y, end_x, end_y);
+    //var points = getPosLeftLine(start_x, start_y, end_x, end_y);
+    var points = getPosRightLine(start_x, start_y, end_x, end_y);
+    
     newPolyline.setAttributeNS(null, "id", "polyline_" + num);
     newPolyline.setAttributeNS(null, "points", points);
     newPolyline.setAttributeNS(null, "fill", "none");
