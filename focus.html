@@ -28,6 +28,7 @@
         }
 
         function clickEvt(evt){
+            removeSelector();
             var selectedElement = evt.target;
             var objType = selectedElement.nodeName;
             if(objType){
@@ -88,15 +89,108 @@
     function setFocus(obj){
         obj.addEventListener('click', setSelected);
     }
-    
-    function setSelected(evt){
-        var selectedElement = evt.target;
-        console.log(evt);
 
-        
-        
+    const SELECTOR = "selector";
+    function setSelected(evt){
+        var padding = 0.15;
+        var selectedElement = evt.target;
+        if(selectedElement.id == SELECTOR){
+            //선택된것을 재선택시에 선택취소
+            removeSelector();
+            selectedObj = null;
+            return;
+        }
+        var x = Number(selectedElement.getAttribute("x")) - padding;
+        var y = Number(selectedElement.getAttribute("y")) - padding;
+        var w = Number(selectedElement.getAttribute("width")) + (padding * 2);
+        var h = Number(selectedElement.getAttribute("height")) + (padding * 2);        
+        //console.log("x:"+ x +", y:"+ y + ", width:"+ w + ", height:"+ h);
+        setSelector(x, y, w, h);
+        //console.log("==>" + document.getElementById("selecter_from"));
+        drawArrow(selectedElement, x, y);
     }
+
+    function removeSelector(){
+        var selector_name = SELECTOR;
+        if(document.getElementById(selector_name)){
+            document.getElementById("svg").removeChild(document.getElementById(selector_name));
+        }
+    }
+
+    function setSelector(x, y, w, h){
+        var selector_name = SELECTOR;
+        removeSelector();
+        var newRect = document.createElementNS(svgNS, "rect");
+        newRect.setAttributeNS(null, "id", selector_name);
+        newRect.setAttributeNS(null, "x", x);
+        newRect.setAttributeNS(null, "y", y);
+        newRect.setAttributeNS(null, "width", w);
+        newRect.setAttributeNS(null, "height", h);
+        newRect.setAttributeNS(null, "fill", "#cccccc");
+        newRect.setAttributeNS(null, "fill-opacity", "0.2");
+        newRect.setAttributeNS(null, "stroke", "red");
+        newRect.setAttributeNS(null, "stroke-width", 0.01);
+        newRect.setAttributeNS(null, "stroke-dasharray", "0.1, 0.1");
+        newRect.addEventListener('mouseover', mouseOver);
+        document.getElementById("svg").appendChild(newRect);
+    }
+
+function drawArrow(selectedElement, pos_x, pos_y){
+    var end_x = pos_x;
+    var end_y = pos_y;
+    document.getElementById("svg").appendChild(makeCircle(pos_x, pos_y));
     
+    if(selectedObj){
+        var start_x = selectedObj.x;
+        var start_y = selectedObj.y;
+        var end_x = pos_x;
+        var end_y = pos_y;
+
+        document.getElementById("svg").appendChild(makeArrow(start_x, start_y, end_x, end_y));
+        selectedObj = null;
+
+    }else{
+        selectedObj = {
+            target: selectedElement,
+            x: pos_x,
+            y: pos_y
+        }
+    }
+}
+
+var circleNum = 0;
+function makeCircle(x, y){
+    var newCircle = document.createElementNS(svgNS, "circle");
+    
+    var num = circleNum++;
+    newCircle.setAttributeNS(null, "id", "circle_" + num);
+    newCircle.setAttributeNS(null, "cx", x);
+    newCircle.setAttributeNS(null, "cy", y);
+    newCircle.setAttributeNS(null, "r", 0.1);
+    newCircle.setAttributeNS(null, "fill", "#cccccc");
+    newCircle.setAttributeNS(null, "stroke", "none");
+    return newCircle;
+}
+
+var polylineNum = 0;
+function makeArrow(start_x, start_y, end_x, end_y){
+    var newPolyline = document.createElementNS(svgNS, "polyline");
+    
+    var num = polylineNum++;
+    var points = start_x + "," + start_y + "," + end_x + "," + end_y;
+    
+    newPolyline.setAttributeNS(null, "id", "polyline_" + num);
+    newPolyline.setAttributeNS(null, "points", points);
+    newPolyline.setAttributeNS(null, "fill", "#cccccc");
+    newPolyline.setAttributeNS(null, "stroke", "#cccccc");
+    newPolyline.setAttributeNS(null, "stroke-width", 0.1);
+    newPolyline.setAttributeNS(null, "marker-end", "url(#Triangle)");
+    return newPolyline;
+}
+
+    function mouseOver(){
+        console.log("1111111");
+    }
     function getMousePosistion(evt){
         var svg = document.getElementById("svg");
         var CTM = svg.getScreenCTM();
@@ -105,5 +199,13 @@
             x: (evt.clientX - CTM.e) / CTM.a,
             y: (evt.clientY - CTM.f) / CTM.d
         };
-    }    
+    }  
+
+function getPosRound(pos){
+    if(pos){
+        return Number(pos.toFixed(15));
+    }
+    return 0;
+}
+       
     </script>
