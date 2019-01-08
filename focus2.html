@@ -1,0 +1,234 @@
+<style>
+    #svg{
+        background-color: beige
+    }
+    .static {
+        cursor: not-allowed
+    }
+    .userObject {
+        cursor: pointer
+    }
+    </style>
+    <svg id="svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 20" onload="addEvent(evt)">
+            <defs>
+                <marker id="Triangle" viewBox="0 0 10 10" refX="1" refY="5" makerWidth="6" makerHeight="6" orient="auto" fill="#cccccc">
+                    <path d="M 0 0 L 10 5 L 0 10 z" />
+                </marker>
+            </defs>
+    </svg>
+
+
+
+<script>
+    var svgNS = "http://www.w3.org/2000/svg";
+    var selectedObj;
+    function addEvent(evt){
+        var svg = evt.target;
+        svg.addEventListener('click', clickEvt);
+    }
+
+    function clickEvt(evt){
+        removeSelector();
+        var selectedElement = evt.target;
+        var objType = selectedElement.nodeName;
+        if(objType){
+            switch (objType) {
+                case "svg" :
+                    console.log("draw rect !");
+                    drawBox(evt);
+                    break;
+                case "rect" :
+                    console.log("set Focus !");
+                    setSelected(evt);
+                    break;                    
+                default :
+                    break;
+            }
+
+            
+        }
+        return;
+    }
+
+function drawBox(evt){
+    var offset = getMousePosistion(evt);
+    var pos_x = offset.x;
+    var pos_y = offset.y;
+    var width = "1.5";    
+    var height = "1.5";
+    document.getElementById("svg").appendChild(makeBox(pos_x, pos_y, width, height));
+}
+
+var rectNum = 0;
+function makeBox(start_x, start_y, width, height){
+    var newRect = document.createElementNS(svgNS, "rect");
+    var num = rectNum++;
+
+    //클릭한 가운데 포지션에 생성
+    var w = (width / 2).toFixed(2);
+    var h = (height / 2).toFixed(2);
+    var x = start_x - w;
+    var y = start_y - h;
+    //var x = start_x;
+    //var y = start_y;
+
+    newRect.setAttributeNS(null, "id", "rect_" + num);
+    newRect.setAttributeNS(null, "x", x);
+    newRect.setAttributeNS(null, "y", y);
+    newRect.setAttributeNS(null, "width", width);
+    newRect.setAttributeNS(null, "height", height);
+    newRect.setAttributeNS(null, "fill", "yellow");
+    newRect.setAttributeNS(null, "stroke", "black");
+    newRect.setAttributeNS(null, "stroke-width", 0.01);
+    return newRect;
+}
+
+const SELECTOR = "selector";
+function setSelected(evt){
+    var padding = 0.15;
+    var selectedElement = evt.target;
+    if(selectedElement.id == SELECTOR){
+        //선택된것을 재선택시에 선택취소
+        removeSelector();
+        selectedObj = null;
+        return;
+    }
+    var x = Number(selectedElement.getAttribute("x")) - padding;
+    var y = Number(selectedElement.getAttribute("y")) - padding;
+    var w = Number(selectedElement.getAttribute("width")) + (padding * 2);
+    var h = Number(selectedElement.getAttribute("height")) + (padding * 2);
+    //console.log("x:"+ x +", y:"+ y + ", width:"+ w + ", height:"+ h);
+    setSelector(x, y, w, h);
+    //console.log("==>" + document.getElementById("selecter_from"));
+    drawArrow(selectedElement, x, y);
+}
+
+function removeSelector(){
+    var selector_name = SELECTOR;
+    if(document.getElementById(selector_name)){
+        document.getElementById("svg").removeChild(document.getElementById(selector_name));
+    }
+}
+
+function setSelector(x, y, w, h){
+    var selector_name = SELECTOR;
+    removeSelector();
+    var newRect = document.createElementNS(svgNS, "rect");
+    newRect.setAttributeNS(null, "id", selector_name);
+    newRect.setAttributeNS(null, "x", x);
+    newRect.setAttributeNS(null, "y", y);
+    newRect.setAttributeNS(null, "width", w);
+    newRect.setAttributeNS(null, "height", h);
+    newRect.setAttributeNS(null, "fill", "#cccccc");
+    newRect.setAttributeNS(null, "fill-opacity", "0.2");
+    newRect.setAttributeNS(null, "stroke", "red");
+    newRect.setAttributeNS(null, "stroke-width", 0.01);
+    newRect.setAttributeNS(null, "stroke-dasharray", "0.1, 0.1");
+    //newRect.addEventListener('mouseover', mouseOver);
+    document.getElementById("svg").appendChild(newRect);
+}
+
+function drawArrow(selectedElement, pos_x, pos_y){
+    var end_x = pos_x;
+    var end_y = pos_y;
+    document.getElementById("svg").appendChild(makeCircle(pos_x, pos_y));
+
+    if(selectedObj){
+        var start_x = selectedObj.x;
+        var start_y = selectedObj.y;
+        var end_x = pos_x;
+        var end_y = pos_y;
+
+        var dx = end_x - start_x;
+        var dy = start_y - end_y;
+        var angle = Math.atan2(dx, dy) * (180.0/Math.PI);
+
+        //음수이면 양수의 각도로 변경(원점에서 수직위가 0도)
+        if(angle < 0){
+            angle = 360 + angle;
+        }
+        console.log("angle:" + angle);
+
+        if(angle >= 45 && angle < 135){
+            console.log("좌측");
+        }else if(angle >= 135 && angle < 225){
+            console.log("하단");
+        }else if(angle >= 225 && angle < 315){
+            console.log("우측");
+        }else{
+            console.log("상단");
+        }
+
+        document.getElementById("svg").appendChild(makeArrow(start_x, start_y, end_x, end_y));
+        selectedObj = null;
+
+    }else{
+        selectedObj = {
+            target: selectedElement,
+            x: pos_x,
+            y: pos_y
+        }
+    }
+    
+}
+
+var circleNum = 0;
+function makeCircle(x, y){
+var newCircle = document.createElementNS(svgNS, "circle");
+
+var num = circleNum++;
+newCircle.setAttributeNS(null, "id", "circle_" + num);
+newCircle.setAttributeNS(null, "cx", x);
+newCircle.setAttributeNS(null, "cy", y);
+newCircle.setAttributeNS(null, "r", 0.1);
+newCircle.setAttributeNS(null, "fill", "#cccccc");
+newCircle.setAttributeNS(null, "stroke", "none");
+return newCircle;
+}
+
+var polylineNum = 0;
+function makeArrow(start_x, start_y, end_x, end_y){
+var newPolyline = document.createElementNS(svgNS, "polyline");
+
+var num = polylineNum++;
+var points = start_x + "," + start_y + "," + end_x + "," + end_y;
+
+newPolyline.setAttributeNS(null, "id", "polyline_" + num);
+newPolyline.setAttributeNS(null, "points", points);
+newPolyline.setAttributeNS(null, "fill", "#cccccc");
+newPolyline.setAttributeNS(null, "stroke", "#cccccc");
+newPolyline.setAttributeNS(null, "stroke-width", 0.1);
+newPolyline.setAttributeNS(null, "marker-end", "url(#Triangle)");
+return newPolyline;
+}
+
+function getSelectorCenter(objSelector){
+
+}
+
+/*
+function mouseOver(evt){
+    console.log("1111111");
+    var pos = getMousePosistion(evt);
+    console.log(pos);
+}
+*/
+
+function getMousePosistion(evt){
+    var svg = document.getElementById("svg");
+    var CTM = svg.getScreenCTM();
+    
+    return {
+        x: (evt.clientX - CTM.e) / CTM.a,
+        y: (evt.clientY - CTM.f) / CTM.d
+    };
+}  
+
+function getPosRound(pos){
+if(pos){
+    return Number(pos.toFixed(15));
+}
+return 0;
+}
+   
+</script>
