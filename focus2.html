@@ -100,7 +100,6 @@ function setSelected(evt){
     //console.log("x:"+ x +", y:"+ y + ", width:"+ w + ", height:"+ h);
     setSelector(x, y, w, h);
     //console.log("==>" + document.getElementById("selecter_from"));
-    drawArrow(selectedElement, x, y);
 }
 
 function removeSelector(){
@@ -126,12 +125,70 @@ function setSelector(x, y, w, h){
     newRect.setAttributeNS(null, "stroke-dasharray", "0.1, 0.1");
     //newRect.addEventListener('mouseover', mouseOver);
     document.getElementById("svg").appendChild(newRect);
+    drawArrow(x, y, w, h);
 }
 
-function drawArrow(selectedElement, pos_x, pos_y){
+function getPoint(start_x, start_y, end_x, end_y){
+    var dx = end_x - start_x;
+    var dy = start_y - end_y;
+    var angle = Math.atan2(dx, dy) * (180.0/Math.PI);
+
+    //음수이면 양수의 각도로 변경(원점에서 수직위가 0도)
+    if(angle < 0){
+        angle = 360 + angle;
+    }
+    console.log("angle:" + angle);
+
+    if(angle >= 45 && angle < 135){
+        console.log("우측");
+        return "RIGHT";
+    }else if(angle >= 135 && angle < 225){
+        console.log("하단");
+        return "BOTTOM";
+    }else if(angle >= 225 && angle < 315){
+        console.log("좌측");
+        return "LEFT";
+    }else{
+        console.log("상단");
+        return "TOP";
+    }    
+}
+
+function getPointCenter(point, x, y, width, height){
+    var xPos = -1;
+    var yPos = -1;
+    switch (point) {
+        case "RIGHT" :
+            xPos = x + width;
+            yPos = y + (height / 2);
+            return {
+                x: xPos,
+                y: yPos
+            };
+            break;
+        case "BOTTOM" :
+            xPos = x + (width / 2);
+            yPos = y + height;
+            break;
+        case "LEFT" :
+            xPos = x;
+            yPos = y + (height / 2);
+            break;
+        case "TOP" :
+            xPos = x + (width / 2);
+            yPos = y;
+            break;
+    }
+    return {
+        x: xPos,
+        y: yPos
+    };
+}
+
+function drawArrow(pos_x, pos_y, width, height){
     var end_x = pos_x;
     var end_y = pos_y;
-    document.getElementById("svg").appendChild(makeCircle(pos_x, pos_y));
+    //document.getElementById("svg").appendChild(makeCircle(pos_x, pos_y));
 
     if(selectedObj){
         var start_x = selectedObj.x;
@@ -139,34 +196,24 @@ function drawArrow(selectedElement, pos_x, pos_y){
         var end_x = pos_x;
         var end_y = pos_y;
 
-        var dx = end_x - start_x;
-        var dy = start_y - end_y;
-        var angle = Math.atan2(dx, dy) * (180.0/Math.PI);
+        var sPoint = getPoint(start_x, start_y, end_x, end_y);
+        console.log("sPoint:"+sPoint);
+        var sPosition = getPointCenter(sPoint, start_x, start_y , width, height);
+        var ePoint = getPoint(end_x, end_y, start_x, start_y);
+        var ePosition = getPointCenter(ePoint, end_x, end_y , width, height);
+        console.log("ePoint:"+ePoint);
 
-        //음수이면 양수의 각도로 변경(원점에서 수직위가 0도)
-        if(angle < 0){
-            angle = 360 + angle;
-        }
-        console.log("angle:" + angle);
 
-        if(angle >= 45 && angle < 135){
-            console.log("좌측");
-        }else if(angle >= 135 && angle < 225){
-            console.log("하단");
-        }else if(angle >= 225 && angle < 315){
-            console.log("우측");
-        }else{
-            console.log("상단");
-        }
 
-        document.getElementById("svg").appendChild(makeArrow(start_x, start_y, end_x, end_y));
+        document.getElementById("svg").appendChild(makeArrow(sPosition.x, sPosition.y, ePosition.x, ePosition.y));
         selectedObj = null;
 
     }else{
         selectedObj = {
-            target: selectedElement,
             x: pos_x,
-            y: pos_y
+            y: pos_y,
+            w: width,
+            h: height
         }
     }
     
@@ -174,32 +221,32 @@ function drawArrow(selectedElement, pos_x, pos_y){
 
 var circleNum = 0;
 function makeCircle(x, y){
-var newCircle = document.createElementNS(svgNS, "circle");
+    var newCircle = document.createElementNS(svgNS, "circle");
 
-var num = circleNum++;
-newCircle.setAttributeNS(null, "id", "circle_" + num);
-newCircle.setAttributeNS(null, "cx", x);
-newCircle.setAttributeNS(null, "cy", y);
-newCircle.setAttributeNS(null, "r", 0.1);
-newCircle.setAttributeNS(null, "fill", "#cccccc");
-newCircle.setAttributeNS(null, "stroke", "none");
-return newCircle;
+    var num = circleNum++;
+    newCircle.setAttributeNS(null, "id", "circle_" + num);
+    newCircle.setAttributeNS(null, "cx", x);
+    newCircle.setAttributeNS(null, "cy", y);
+    newCircle.setAttributeNS(null, "r", 0.1);
+    newCircle.setAttributeNS(null, "fill", "#cccccc");
+    newCircle.setAttributeNS(null, "stroke", "none");
+    return newCircle;
 }
 
 var polylineNum = 0;
 function makeArrow(start_x, start_y, end_x, end_y){
-var newPolyline = document.createElementNS(svgNS, "polyline");
+    var newPolyline = document.createElementNS(svgNS, "polyline");
 
-var num = polylineNum++;
-var points = start_x + "," + start_y + "," + end_x + "," + end_y;
+    var num = polylineNum++;
+    var points = start_x + "," + start_y + "," + end_x + "," + end_y;
 
-newPolyline.setAttributeNS(null, "id", "polyline_" + num);
-newPolyline.setAttributeNS(null, "points", points);
-newPolyline.setAttributeNS(null, "fill", "#cccccc");
-newPolyline.setAttributeNS(null, "stroke", "#cccccc");
-newPolyline.setAttributeNS(null, "stroke-width", 0.1);
-newPolyline.setAttributeNS(null, "marker-end", "url(#Triangle)");
-return newPolyline;
+    newPolyline.setAttributeNS(null, "id", "polyline_" + num);
+    newPolyline.setAttributeNS(null, "points", points);
+    newPolyline.setAttributeNS(null, "fill", "#cccccc");
+    newPolyline.setAttributeNS(null, "stroke", "#cccccc");
+    newPolyline.setAttributeNS(null, "stroke-width", 0.1);
+    newPolyline.setAttributeNS(null, "marker-end", "url(#Triangle)");
+    return newPolyline;
 }
 
 function getSelectorCenter(objSelector){
