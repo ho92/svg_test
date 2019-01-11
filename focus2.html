@@ -205,7 +205,7 @@ function drawArrow(pos_x, pos_y, width, height){
 
 
 
-        document.getElementById("svg").appendChild(makeArrow(sPosition.x, sPosition.y, ePosition.x, ePosition.y));
+        document.getElementById("svg").appendChild(makeArrow(sPoint, sPosition.x, sPosition.y, ePosition.x, ePosition.y));
         selectedObj = null;
 
     }else{
@@ -234,15 +234,28 @@ function makeCircle(x, y){
 }
 
 var polylineNum = 0;
-function makeArrow(start_x, start_y, end_x, end_y){
+function makeArrow(sPoint, start_x, start_y, end_x, end_y){
     var newPolyline = document.createElementNS(svgNS, "polyline");
 
     var num = polylineNum++;
     var points = start_x + "," + start_y + "," + end_x + "," + end_y;
-
+    switch (sPoint) {
+        case "RIGHT" :
+            points = getPosRightLine(start_x, start_y, end_x, end_y);
+            break;
+        case "BOTTOM" :
+            points = getPosBottomLine(start_x, start_y, end_x, end_y);
+            break;
+        case "LEFT" :
+            points = getPosLeftLine(start_x, start_y, end_x, end_y);
+            break;
+        case "TOP" :
+            points = getPosTopLine(start_x, start_y, end_x, end_y);
+            break;
+    }
     newPolyline.setAttributeNS(null, "id", "polyline_" + num);
     newPolyline.setAttributeNS(null, "points", points);
-    newPolyline.setAttributeNS(null, "fill", "#cccccc");
+    newPolyline.setAttributeNS(null, "fill", "none");
     newPolyline.setAttributeNS(null, "stroke", "#cccccc");
     newPolyline.setAttributeNS(null, "stroke-width", 0.1);
     newPolyline.setAttributeNS(null, "marker-end", "url(#Triangle)");
@@ -252,14 +265,6 @@ function makeArrow(start_x, start_y, end_x, end_y){
 function getSelectorCenter(objSelector){
 
 }
-
-/*
-function mouseOver(evt){
-    console.log("1111111");
-    var pos = getMousePosistion(evt);
-    console.log(pos);
-}
-*/
 
 function getMousePosistion(evt){
     var svg = document.getElementById("svg");
@@ -277,5 +282,61 @@ if(pos){
 }
 return 0;
 }
-   
+
+function getPosBottomLine(start_x, start_y, end_x, end_y){
+    var points = '';
+    var yLen = Math.abs(start_y - end_y);
+    yLen = yLen / 2;
+    
+    var yPoint = end_y - getPosRound(yLen);
+    
+    points = start_x + "," + start_y;
+    points+= " " + start_x + "," + yPoint;
+    points+= " " + end_x + "," + yPoint;
+    points+= " " + end_x + "," + end_y;
+    return points;
+}
+
+function getPosTopLine(start_x, start_y, end_x, end_y){
+    var points = '';
+    var yLen = Math.abs(start_y - end_y);
+    yLen = yLen / 2;
+    
+    var yPoint = end_y + getPosRound(yLen);
+
+    points = start_x + "," + start_y;
+    points+= " " + start_x + "," + yPoint;
+    points+= " " + end_x + "," + yPoint;
+    points+= " " + end_x + "," + end_y;   
+    return points;
+}
+
+function getPosLeftLine(start_x, start_y, end_x, end_y){
+    var points = '';
+    var xLen = Math.abs(start_x - end_x);
+    xLen = xLen / 2;
+    
+    var xPoint = end_x + getPosRound(xLen);
+
+    points = start_x + "," + start_y;
+    points+= " " + xPoint + "," + start_y;
+    points+= " " + xPoint + "," + end_y;
+    points+= " " + end_x + "," + end_y;     
+    return points;
+}
+
+function getPosRightLine(start_x, start_y, end_x, end_y){
+    var points = '';
+    var xLen = Math.abs(start_x - end_x);
+    xLen = xLen / 2;
+    
+    var xPoint = end_x - getPosRound(xLen);
+
+    points = start_x + "," + start_y;
+    points+= " " + xPoint + "," + start_y;
+    points+= " " + xPoint + "," + end_y;
+    points+= " " + end_x + "," + end_y;     
+    return points;
+}
+
 </script>
