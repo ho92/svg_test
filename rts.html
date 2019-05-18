@@ -1,0 +1,165 @@
+<html>
+    <head>
+        <title>RTS Test</title>
+        <script language="javascript">
+            
+            var svgNS = "http://www.w3.org/2000/svg";
+
+            var data = [{"event_type":"click", "dom":"{id:document.test1.test2.test3}", "value":""}
+                        ,{"event_type":"input", "dom":"{id:document.test11.test22.test33}", "value":"test value"}
+                        ,{"event_type":"input", "dom":"{id:document.test111.test222.test333}", "value":"2019-03-04"}
+                        ];
+            
+
+            function draw(){
+                var arrow_gap = 1;  //화살표 보정치
+                var space = 15;
+                var width = 40;
+                var height = 10;
+                var pos_x = 100 / 2;
+                console.log("%cpos_x:" + pos_x, "color:red;font-weight:bold");
+                var pos_y = space;
+
+                var cnt = data.length;
+
+                for(var i=0;i<cnt;i++){
+                    var map = data[i];
+                    if(i > 0){
+                        pos_y = pos_y + (height/2) + space;
+                    }
+                    document.getElementById("svg").appendChild(makeBox(pos_x, pos_y, width, height));
+
+                    var start_pos_y = pos_y + (height/2);
+                    var end_pos_y = start_pos_y + space - (height/2) - arrow_gap;
+                    if(i < (cnt - 1)){
+                        document.getElementById("svg").appendChild(makeArrow(pos_x, start_pos_y, pos_x, end_pos_y));
+                    }
+
+                    var text_x = pos_x - (width/2) + 0.7;
+                    var text_y = pos_y + 1.2;
+                    document.getElementById("svg").appendChild(makeTextLabel("dom", map.dom, text_x, text_y));
+                }
+            }
+
+            //X와 Y 포지션은 Rect의 중간이 기준.
+            var rectNum = 0;
+            function makeBox(start_x, start_y, width, height){
+                var newRect = document.createElementNS(svgNS, "rect");
+                var num = rectNum++;
+
+                //클릭한 가운데 포지션에 생성
+                var w = (width / 2).toFixed(2);
+                var h = (height / 2).toFixed(2);
+                var x = start_x - w;
+                var y = start_y - h;
+                //var x = start_x;
+                //var y = start_y;
+
+                newRect.setAttributeNS(null, "id", "rect_" + num);
+                newRect.setAttributeNS(null, "x", x);
+                newRect.setAttributeNS(null, "y", y);
+                newRect.setAttributeNS(null, "width", width);
+                newRect.setAttributeNS(null, "height", height);
+                newRect.setAttributeNS(null, "fill", "#EEEEEE");
+                newRect.setAttributeNS(null, "stroke", "#C7C7C7");
+                newRect.setAttributeNS(null, "stroke-width", 0.3);
+                newRect.setAttributeNS(null, "rx", 1.5);
+                newRect.setAttributeNS(null, "ry", 1.5);
+                return newRect;
+            }  
+
+            function addEvent(evt){
+                var svg = evt.target;
+                svg.addEventListener('click', clickEvt);
+            }
+
+            function clickEvt(evt){
+                var selectedElement = evt.target;
+                console.log("clickEvt - selectedElement:" + selectedElement);
+                var objType = selectedElement.nodeName;
+                if(objType){
+                    switch (objType) {
+                        case "svg" :
+                            break;
+                        case "rect" :
+                            break;                    
+                        default :
+                            break;
+                    }
+                }
+                return;
+            }
+
+            var polylineNum = 0;
+            function makeArrow(start_x, start_y, end_x, end_y){
+                var newPolyline = document.createElementNS(svgNS, "polyline");
+
+                var num = polylineNum++;
+                var points = start_x + "," + start_y + "," + end_x + "," + end_y;
+  
+                newPolyline.setAttributeNS(null, "id", "polyline_" + num);
+                newPolyline.setAttributeNS(null, "points", points);
+                newPolyline.setAttributeNS(null, "fill", "none");
+                newPolyline.setAttributeNS(null, "stroke", "#BBBBBB");
+                newPolyline.setAttributeNS(null, "stroke-width", 0.6);  //화살표 크기가 같이 결정됨.
+                newPolyline.setAttributeNS(null, "marker-end", "url(#Triangle)");
+                return newPolyline;
+            }
+
+            var textNum = 0;
+            function makeTextLabel(sType, sText, x, y){
+                var newText = document.createElementNS(svgNS, "text");
+                var num = textNum++;
+                newText.setAttributeNS(null, "id", sType + "label_" + num);
+                newText.setAttributeNS(null, "x", x);
+                newText.setAttributeNS(null, "y", y);
+                newText.setAttributeNS(null, "font-size", "4px");
+                newText.setAttributeNS(null, "fill", "#565656");
+                var textNode = document.createTextNode(getMaxTextLen(sType, sText));
+                newText.appendChild(textNode);                
+                return newText;
+            }
+
+            function getMaxTextLen(sType, originText){
+                var len = 0; // 표시할 글자수 기준
+                switch (sType) {
+                    case "dom" :
+                    len = 20;
+                        break;
+                    default :
+                    len = 20;
+                        break;
+                }                
+                
+                var shortText = "";
+                if (originText.length > len) {
+                    shortText = originText.substr(0, len-2) + '... }';
+                }
+                return shortText;
+            }
+        </script>
+        <style>
+            body {
+                margin: 0%;
+            }
+            #svg{
+                background-color: #FFFFFF
+            }
+            .static {
+                cursor: not-allowed
+            }
+            .userObject {
+                cursor: pointer
+            }
+        </style>        
+    </head>
+<body onload="draw()">
+    <svg id="svg" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 100 100" onload="addEvent(evt)">
+        <defs>
+            <marker id="Triangle" viewBox="0 0 10 10" refX="5" refY="5" makerWidth="6" makerHeight="6" orient="auto" fill="#cccccc" orient="auto-start-reverse">
+                <path d="M 0 0 L 10 5 L 0 10 z" />
+            </marker>
+        </defs>
+</svg>
+</body>
+</html>
