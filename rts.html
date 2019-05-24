@@ -15,7 +15,7 @@
                 var arrow_gap = 1;  //화살표 보정치
                 var space = 15;
                 var width = 40;
-                var height = 10;
+                var height = 15;
                 var pos_x = 100 / 2;
                 console.log("%cpos_x:" + pos_x, "color:red;font-weight:bold");
                 var pos_y = space;
@@ -27,17 +27,35 @@
                     if(i > 0){
                         pos_y = pos_y + (height/2) + space;
                     }
+                    var left_pos = pos_x - (width/2);
+
+                    //박스
                     document.getElementById("svg").appendChild(makeBox(pos_x, pos_y, width, height));
 
+                    //Event type text
+                    var fontSize = 4;
+                    var text_x = left_pos + 1;
+                    var text_y = pos_y - (height/2) + fontSize;    //4는 텍스트 폰트사이즈
+                    document.getElementById("svg").appendChild(makeTextLabel("event_type", map.event_type, fontSize, "#FF8000", text_x, text_y));
+
+                    //박스에 중간 라인
+                    var line_start_x = left_pos ;
+                    var line_end_x = line_start_x + width;
+                    var line_y = pos_y - 1.5;
+                    document.getElementById("svg").appendChild(makeLine(line_start_x, line_y, line_end_x, line_y));
+
+                    //화살표
                     var start_pos_y = pos_y + (height/2);
                     var end_pos_y = start_pos_y + space - (height/2) - arrow_gap;
                     if(i < (cnt - 1)){
                         document.getElementById("svg").appendChild(makeArrow(pos_x, start_pos_y, pos_x, end_pos_y));
                     }
 
+                    //dom id text
+                    fontSize = 4;
                     var text_x = pos_x - (width/2) + 0.7;
-                    var text_y = pos_y + 1.2;
-                    document.getElementById("svg").appendChild(makeTextLabel("dom", map.dom, text_x, text_y));
+                    var text_y = pos_y + 4;
+                    document.getElementById("svg").appendChild(makeTextLabel("dom", map.dom, fontSize, "#565656", text_x, text_y));
                 }
             }
 
@@ -107,16 +125,16 @@
             }
 
             var textNum = 0;
-            function makeTextLabel(sType, sText, x, y){
+            function makeTextLabel(sType, sText, size, color, x, y){
                 var newText = document.createElementNS(svgNS, "text");
                 var num = textNum++;
                 newText.setAttributeNS(null, "id", sType + "label_" + num);
                 newText.setAttributeNS(null, "x", x);
                 newText.setAttributeNS(null, "y", y);
-                newText.setAttributeNS(null, "font-size", "4px");
-                newText.setAttributeNS(null, "fill", "#565656");
+                newText.setAttributeNS(null, "font-size", size + "px");
+                newText.setAttributeNS(null, "fill", color);
                 var textNode = document.createTextNode(getMaxTextLen(sType, sText));
-                newText.appendChild(textNode);                
+                newText.appendChild(textNode);
                 return newText;
             }
 
@@ -134,9 +152,27 @@
                 var shortText = "";
                 if (originText.length > len) {
                     shortText = originText.substr(0, len-2) + '... }';
+                }else{
+                    shortText = originText;
                 }
                 return shortText;
             }
+
+            var lineNum = 0;
+            function makeLine(start_x, start_y, end_x, end_y){
+                var newline = document.createElementNS(svgNS, "line");
+                var num = lineNum++;
+                newline.setAttributeNS(null, "id", "line_" + num);
+                newline.setAttributeNS(null, "x1", start_x);
+                newline.setAttributeNS(null, "y1", start_y);
+                newline.setAttributeNS(null, "x2", end_x);
+                newline.setAttributeNS(null, "y2", end_y);
+                newline.setAttributeNS(null, "fill", "none");
+                newline.setAttributeNS(null, "stroke", "#BBBBBB");
+                newline.setAttributeNS(null, "stroke-width", 0.2);  //화살표 크기가 같이 결정됨.
+                return newline;
+            }
+
         </script>
         <style>
             body {
