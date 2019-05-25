@@ -5,32 +5,71 @@
             
             var svgNS = "http://www.w3.org/2000/svg";
 
-            var data = [{"event_type":"click", "dom":"{id:document.test1.test2.test3}", "value":""}
-                        ,{"event_type":"input", "dom":"{id:document.test11.test22.test33}", "value":"test value"}
-                        ,{"event_type":"input", "dom":"{id:document.test111.test222.test333}", "value":"2019-03-04"}
+            var commands = [{"event_type":"click", "dom":"{id:document.test1.test2.test3}", "value":"qqq"}
+                            ,{"event_type":"input", "dom":"{id:document.test11.test22.test33}", "value":"test value"}
+                            ,{"event_type":"input", "dom":"{id:document.test111.test222.test333}", "value":"2019-03-04"}
                         ];
             
+            var datas = [{"value1":"", "value2":""}
+                        ,{"value1":"", "value2":""}
+                        ];
 
+            //객체 그리기
             function draw(){
+/*
+                var domBox = makeBoxForDom(20, 7.5, 40, 15);
+                    document.getElementById("svg").appendChild(domBox);
+
+                var obj = makeTextLabel("dom", "1231231231231231", 4, "#565656", 0, 0);
+                document.getElementById("svg").appendChild(obj);
+                console.log(obj);
+                var pos_x = obj.x;
+                console.log("pos_x", pos_x);
+                var pos_y = obj.y.animVal[0].value;
+                console.log("pos_y", pos_y);
+                return;
+*/
                 var arrow_gap = 1;  //화살표 보정치
-                var space = 15;
-                var width = 40;
-                var height = 15;
-                var pos_x = 100 / 2;
+                var space = 15;     //박스 간격
+                var width = 40;     //박스크기
+                var height = 15;    //박스 높이
+                var pos_x = (100 / 2) - 26;    //박스의 중심축
+                //var pos_x = (100 / 2) - width;    //박스의 중심축
                 console.log("%cpos_x:" + pos_x, "color:red;font-weight:bold");
                 var pos_y = space;
 
-                var cnt = data.length;
+                var cnt = commands.length;
 
                 for(var i=0;i<cnt;i++){
-                    var map = data[i];
+                    var map = commands[i];
                     if(i > 0){
                         pos_y = pos_y + (height/2) + space;
                     }
                     var left_pos = pos_x - (width/2);
 
-                    //박스
-                    document.getElementById("svg").appendChild(makeBox(pos_x, pos_y, width, height));
+                    //dom 박스
+                    var domBox = makeBoxForDom(pos_x, pos_y, width, height);
+                    document.getElementById("svg").appendChild(domBox);
+
+                    var value_box_x = pos_x + width + space;
+                    var value_box_height = 8;
+                    var value_box_width = 35;
+                    //value 박스
+                    var valBox = makeBoxForVal(value_box_x, pos_y, value_box_width, value_box_height);
+                    document.getElementById("svg").appendChild(valBox);
+
+                    //Value text
+                    var val_text_pos_x = valBox.x.animVal.value + 1.5;
+                    var val_text_pos_y = valBox.y.animVal.value + 5.5;
+                    var val_fontSize = 4;
+                    document.getElementById("svg").appendChild(makeTextLabel("val", map.value, val_fontSize, "#2080D0", val_text_pos_x, val_text_pos_y));
+
+                    //화살표
+                    var domPos = getRectPerimeterCenterPos(domBox, "right");
+                    console.log(domPos);
+                    var valPos = getRectPerimeterCenterPos(valBox, "left");
+                    document.getElementById("svg").appendChild(makeArrowForVal(valPos["x"], valPos["y"], domPos["x"] + arrow_gap, domPos["y"]));
+                    
 
                     //Event type text
                     var fontSize = 4;
@@ -48,7 +87,7 @@
                     var start_pos_y = pos_y + (height/2);
                     var end_pos_y = start_pos_y + space - (height/2) - arrow_gap;
                     if(i < (cnt - 1)){
-                        document.getElementById("svg").appendChild(makeArrow(pos_x, start_pos_y, pos_x, end_pos_y));
+                        document.getElementById("svg").appendChild(makeArrowForDom(pos_x, start_pos_y, pos_x, end_pos_y));
                     }
 
                     //dom id text
@@ -59,33 +98,36 @@
                 }
             }
 
-            //X와 Y 포지션은 Rect의 중간이 기준.
-            var rectNum = 0;
-            function makeBox(start_x, start_y, width, height){
-                var newRect = document.createElementNS(svgNS, "rect");
-                var num = rectNum++;
+            //Dom 정보 박스
+            function makeBoxForDom(start_x, start_y, width, height){
+                var opt = {"fill":"#EEEEEE", "stroke":"#C7C7C7", "stroke-width":0.3, "rx":1.5, "ry":1.5}
+                return makeBox(start_x, start_y, width, height, opt);
+            }
 
-                //클릭한 가운데 포지션에 생성
-                var w = (width / 2).toFixed(2);
-                var h = (height / 2).toFixed(2);
-                var x = start_x - w;
-                var y = start_y - h;
-                //var x = start_x;
-                //var y = start_y;
+            //Value 정보 박스
+            function makeBoxForVal(start_x, start_y, width, height){
+                var opt = {"fill":"#ffffff", "stroke":"#C7C7C7", "stroke-width":0.3, "stroke-dasharray":"0.5"}
+                return makeBox(start_x, start_y, width, height, opt);
+            }
+            
+            //Dom 정보 박스 화살표
+            function makeArrowForDom(start_x, start_y, end_x, end_y){
+                var opt = {"fill":"none", "stroke":"#BBBBBB", "stroke-width":0.6}
+                return makeArrow(start_x, start_y, end_x, end_y, opt);
+            }
 
-                newRect.setAttributeNS(null, "id", "rect_" + num);
-                newRect.setAttributeNS(null, "x", x);
-                newRect.setAttributeNS(null, "y", y);
-                newRect.setAttributeNS(null, "width", width);
-                newRect.setAttributeNS(null, "height", height);
-                newRect.setAttributeNS(null, "fill", "#EEEEEE");
-                newRect.setAttributeNS(null, "stroke", "#C7C7C7");
-                newRect.setAttributeNS(null, "stroke-width", 0.3);
-                newRect.setAttributeNS(null, "rx", 1.5);
-                newRect.setAttributeNS(null, "ry", 1.5);
-                return newRect;
-            }  
+            //Value 정보 박스 화살표
+            function makeArrowForVal(start_x, start_y, end_x, end_y){
+                var opt = {"fill":"none", "stroke":"#BBBBBB", "stroke-width":0.6, "stroke-dasharray":"0.5"}
+                return makeArrow(start_x, start_y, end_x, end_y, opt);
+            }            
+            //텍스트 
+            function makeTextLabel(sType, sText, size, color, x, y){
+                var opt = {"font-size":size, "fill":color};
+                return makeText(sType, sText, x, y, opt);
+            }
 
+            //클릭시 이벤트 정보를 수신.
             function addEvent(evt){
                 var svg = evt.target;
                 svg.addEventListener('click', clickEvt);
@@ -108,8 +150,69 @@
                 return;
             }
 
+
+            //box의 각 변의 중심을 포지션을 구한다(화살표용)
+            //box를 그릴때의 x,y는 박스의 중심이지만 포지션 값을 구할때는 모서리다;;
+            function getRectPerimeterCenterPos(obj, sType){
+                var pos_x = obj.x.animVal.value;
+                var pos_y = obj.y.animVal.value;
+                var width = obj.width.animVal.value;
+                var height = obj.height.animVal.value;
+
+                var x = 0;
+                var y = 0;
+                switch (sType) {
+                    case "top" :
+                        x = pos_x + (width / 2);
+                        y = pos_y;
+                        break;
+                    case "bottom" :
+                        x = pos_x + (width / 2);
+                        y = pos_y + height;
+                        break;
+                    case "left" :
+                        x = pos_x;
+                        y = pos_y + (height / 2);
+                        break;
+                    case "right" :
+                        x = pos_x + width;
+                        y = pos_y + (height / 2);
+                        break;                        
+                    default :
+                        break;
+                }                
+                var pos = {"x":x, "y":y};
+                return pos;
+            }            
+
+            //X와 Y 포지션은 Rect의 중간이 기준.
+            var rectNum = 0;
+            function makeBox(start_x, start_y, width, height, opt){
+                var newRect = document.createElementNS(svgNS, "rect");
+                var num = rectNum++;
+
+                //클릭한 가운데 포지션에 생성
+                var w = (width / 2).toFixed(2);
+                var h = (height / 2).toFixed(2);
+                var x = start_x - w;
+                var y = start_y - h;
+                //var x = start_x;
+                //var y = start_y;
+
+                newRect.setAttributeNS(null, "id", "rect_" + num);
+                newRect.setAttributeNS(null, "x", x);
+                newRect.setAttributeNS(null, "y", y);
+                newRect.setAttributeNS(null, "width", width);
+                newRect.setAttributeNS(null, "height", height);
+
+                for (var key in opt){
+                    newRect.setAttributeNS(null, key, opt[key]);    
+                }    
+                return newRect;
+            } 
+
             var polylineNum = 0;
-            function makeArrow(start_x, start_y, end_x, end_y){
+            function makeArrow(start_x, start_y, end_x, end_y, opt){
                 var newPolyline = document.createElementNS(svgNS, "polyline");
 
                 var num = polylineNum++;
@@ -117,22 +220,27 @@
   
                 newPolyline.setAttributeNS(null, "id", "polyline_" + num);
                 newPolyline.setAttributeNS(null, "points", points);
-                newPolyline.setAttributeNS(null, "fill", "none");
-                newPolyline.setAttributeNS(null, "stroke", "#BBBBBB");
-                newPolyline.setAttributeNS(null, "stroke-width", 0.6);  //화살표 크기가 같이 결정됨.
+                
+                for (var key in opt){
+                    newPolyline.setAttributeNS(null, key, opt[key]);    
+                }                   
+
                 newPolyline.setAttributeNS(null, "marker-end", "url(#Triangle)");
                 return newPolyline;
             }
 
             var textNum = 0;
-            function makeTextLabel(sType, sText, size, color, x, y){
+            function makeText(sType, sText, x, y, opt){
                 var newText = document.createElementNS(svgNS, "text");
                 var num = textNum++;
                 newText.setAttributeNS(null, "id", sType + "label_" + num);
                 newText.setAttributeNS(null, "x", x);
                 newText.setAttributeNS(null, "y", y);
-                newText.setAttributeNS(null, "font-size", size + "px");
-                newText.setAttributeNS(null, "fill", color);
+
+                for (var key in opt){
+                    newText.setAttributeNS(null, key, opt[key]);    
+                } 
+
                 var textNode = document.createTextNode(getMaxTextLen(sType, sText));
                 newText.appendChild(textNode);
                 return newText;
@@ -189,7 +297,7 @@
             }
         </style>        
     </head>
-<body onload="draw()">
+<body onload="draw()">    
     <svg id="svg" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 100 100" onload="addEvent(evt)">
         <defs>
             <marker id="Triangle" viewBox="0 0 10 10" refX="5" refY="5" makerWidth="6" makerHeight="6" orient="auto" fill="#cccccc" orient="auto-start-reverse">
