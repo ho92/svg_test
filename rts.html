@@ -22,6 +22,12 @@
 
             //객체 그리기
             function draw(){
+                //contents의 길이에 따라 조절
+                var viewBoxHeight = commands.length * 24;
+                if(viewBoxHeight < 100){
+                    viewBoxHeight = 100;
+                }
+                document.getElementById("svg").setAttribute("viewBox", "0 0 100 " + viewBoxHeight); 
 /*
                 var domBox = makeBoxForDom(20, 7.5, 40, 15);
                     document.getElementById("svg").appendChild(domBox);
@@ -70,7 +76,7 @@
                         var val_text_pos_x = valBox.x.animVal.value + 1.5;
                         var val_text_pos_y = valBox.y.animVal.value + 5.5;
                         var val_fontSize = 4;
-                        document.getElementById("svg").appendChild(makeTextLabel("val", map.value, val_fontSize, "#2080D0", val_text_pos_x, val_text_pos_y));
+                        document.getElementById("svg").appendChild(makeTextLabel(i, "val", map.value, val_fontSize, "#2080D0", val_text_pos_x, val_text_pos_y));
 
                         //화살표
                         var domPos = getRectPerimeterCenterPos(domBox, "right");
@@ -83,7 +89,7 @@
                     var fontSize = 4;
                     var text_x = left_pos + 1;
                     var text_y = pos_y - (height/2) + fontSize;    //4는 텍스트 폰트사이즈
-                    document.getElementById("svg").appendChild(makeTextLabel("event_type", map.event_type, fontSize, "#FF8000", text_x, text_y));
+                    document.getElementById("svg").appendChild(makeTextLabel(i, "event_type", map.event_type, fontSize, "#FF8000", text_x, text_y));
 
                     //박스에 중간 라인
                     var line_start_x = left_pos ;
@@ -102,7 +108,7 @@
                     fontSize = 4;
                     var text_x = pos_x - (width/2) + 0.7;
                     var text_y = pos_y + 4;
-                    document.getElementById("svg").appendChild(makeTextLabel("dom", map.dom, fontSize, "#565656", text_x, text_y));
+                    document.getElementById("svg").appendChild(makeTextLabel(i, "dom", map.dom, fontSize, "#565656", text_x, text_y));
                 }
             }
 
@@ -130,8 +136,8 @@
                 return makeArrow(start_x, start_y, end_x, end_y, opt);
             }            
             //텍스트 
-            function makeTextLabel(sType, sText, size, color, x, y){
-                var opt = {"font-size":size, "fill":color};
+            function makeTextLabel(idx, sType, sText, size, color, x, y){
+                var opt = {"font-size":size, "fill":color, "style":"cursor:pointer", "data_idx":idx};
                 return makeText(sType, sText, x, y, opt);
             }
 
@@ -143,11 +149,17 @@
 
             function clickEvt(evt){
                 var selectedElement = evt.target;
-                console.log("clickEvt - selectedElement:" + selectedElement);
+                var objId = selectedElement.id;
+                console.log("clickEvt - selectedElement:", selectedElement);
                 var objType = selectedElement.nodeName;
+                console.log("objType", objType);
                 if(objType){
                     switch (objType) {
-                        case "svg" :
+                        case "text" :
+                            var idx = document.getElementById(objId).getAttribute("data_idx");
+                            idx = Number(idx);
+                            console.log(commands[idx]);
+                            alert("[Event]:" + commands[idx].event_type + "\n\n" + "[Dom ID]:" + commands[idx].dom + "\n\n" + "[Value]:" + commands[idx].value + "\n");
                             break;
                         case "rect" :
                             break;                    
@@ -244,7 +256,6 @@
                 newText.setAttributeNS(null, "id", sType + "label_" + num);
                 newText.setAttributeNS(null, "x", x);
                 newText.setAttributeNS(null, "y", y);
-
                 for (var key in opt){
                     newText.setAttributeNS(null, key, opt[key]);    
                 } 
@@ -303,21 +314,20 @@
             .userObject {
                 cursor: pointer
             }
+            /*
+            margin:0 auto;;width:400px;overflow:auto;
+            */
         </style>        
     </head>
 <body onload="draw()">
-
-        <svg id="svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" onload="addEvent(evt)" style="width: 100%; padding-bottom: 92%; height: auto; overflow: visible">
+<div style="border:1px solid red">
+        <svg id="svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" onload="addEvent(evt)" style="width:100%;height:auto;">
             <defs>
                 <marker id="Triangle" viewBox="0 0 10 10" refX="5" refY="5" makerWidth="6" makerHeight="6" orient="auto" fill="#cccccc" orient="auto-start-reverse">
                     <path d="M 0 0 L 10 5 L 0 10 z" />
                 </marker>
             </defs>
         </svg>
-
-
-
-
-
+</div>
 </body>
 </html>
