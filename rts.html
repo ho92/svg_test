@@ -5,7 +5,7 @@
             
             var svgNS = "http://www.w3.org/2000/svg";
 
-            var commands = [{"event_type":"click", "dom":"{id:document.test1.test2.test3}", "value":"qqq"}
+            var commands = [{"event_type":"click", "dom":"{id:document.test1.test2.test3}", "value":""}
                             ,{"event_type":"input", "dom":"{id:document.test11.test22.test33}", "value":"test value"}
                             ,{"event_type":"input", "dom":"{id:document.test111.test222.test333}", "value":"2019-03-04"}
                         ];
@@ -33,7 +33,7 @@
                 var space = 15;     //박스 간격
                 var width = 40;     //박스크기
                 var height = 15;    //박스 높이
-                var pos_x = (100 / 2) - 26;    //박스의 중심축
+                var pos_x = (100 / 2) - 24;    //박스의 중심축
                 //var pos_x = (100 / 2) - width;    //박스의 중심축
                 console.log("%cpos_x:" + pos_x, "color:red;font-weight:bold");
                 var pos_y = space;
@@ -51,25 +51,27 @@
                     var domBox = makeBoxForDom(pos_x, pos_y, width, height);
                     document.getElementById("svg").appendChild(domBox);
 
-                    var value_box_x = pos_x + width + space;
-                    var value_box_height = 8;
-                    var value_box_width = 35;
-                    //value 박스
-                    var valBox = makeBoxForVal(value_box_x, pos_y, value_box_width, value_box_height);
-                    document.getElementById("svg").appendChild(valBox);
+                    if(map.value){
 
-                    //Value text
-                    var val_text_pos_x = valBox.x.animVal.value + 1.5;
-                    var val_text_pos_y = valBox.y.animVal.value + 5.5;
-                    var val_fontSize = 4;
-                    document.getElementById("svg").appendChild(makeTextLabel("val", map.value, val_fontSize, "#2080D0", val_text_pos_x, val_text_pos_y));
+                        var value_box_x = pos_x + width + (space / 2);
+                        var value_box_height = 8;
+                        var value_box_width = 35;
+                        //value 박스
+                        var valBox = makeBoxForVal(value_box_x, pos_y, value_box_width, value_box_height);
+                        document.getElementById("svg").appendChild(valBox);                        
 
-                    //화살표
-                    var domPos = getRectPerimeterCenterPos(domBox, "right");
-                    console.log(domPos);
-                    var valPos = getRectPerimeterCenterPos(valBox, "left");
-                    document.getElementById("svg").appendChild(makeArrowForVal(valPos["x"], valPos["y"], domPos["x"] + arrow_gap, domPos["y"]));
-                    
+                        //Value text
+                        var val_text_pos_x = valBox.x.animVal.value + 1.5;
+                        var val_text_pos_y = valBox.y.animVal.value + 5.5;
+                        var val_fontSize = 4;
+                        document.getElementById("svg").appendChild(makeTextLabel("val", map.value, val_fontSize, "#2080D0", val_text_pos_x, val_text_pos_y));
+
+                        //화살표
+                        var domPos = getRectPerimeterCenterPos(domBox, "right");
+                        console.log(domPos);
+                        var valPos = getRectPerimeterCenterPos(valBox, "left");
+                        document.getElementById("svg").appendChild(makeArrowForVal(valPos["x"], valPos["y"], domPos["x"] + arrow_gap, domPos["y"]));
+                    }
 
                     //Event type text
                     var fontSize = 4;
